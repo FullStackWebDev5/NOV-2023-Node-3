@@ -1,42 +1,26 @@
 const express = require('express')
+const bodyParser = require('body-parser')
 const ejs = require('ejs');
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+dotenv.config();
+
+const userRoutes = require('./src/routes/users.js')
 
 const app = express()
 
+app.use(bodyParser.urlencoded())
+app.use(userRoutes)
+
 app.set('view engine', 'ejs')
-
-// Name of the model -> Singular and Pascal Case
-// User -> users
-
-const User = mongoose.model('User', {
-  firstName: String,
-  lastName: String,
-  email: String
-})
-
-const Book = mongoose.model('Book', {
-  authorName: String,
-  bookName: String,
-})
-
-const Child = mongoose.model('Child', {
-  name: String,
-  parentName: String,
-})
-
-const Lady = mongoose.model('Lady', {
-  name: String,
-  spouseName: String,
-})
 
 app.get('/', (req, res) => {
   res.send('Our first Node Express Server :)')
 })
 
-app.listen(3000, () => {
+app.listen(process.env.PORT, () => {
   mongoose
-    .connect('mongodb+srv://user:user123@cluster0.gbxvqva.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+    .connect(process.env.MONGODB_URL)
     .then(() => console.log('Server is up :)'))
     .catch((error) => console.log(error))
 })
@@ -73,21 +57,38 @@ app.listen(3000, () => {
 
   REST APIs: Representational State Transfer
   CRUD Opeartions:
-      - GET (Read)
-      - POST (Create)
-      - PUT/PATCH (Update)
-      - DELETE (Delete)
+    - GET (Read)
+    - POST (Create)
+    - PUT/PATCH (Update)
+    - DELETE (Delete)
 
   E-Commerce:
   - Customers
       - GET /customers (Read)
       - POST /customers (Create)
-      - PUT /customers/:id (Update)
+      - PATCH /customers/:id (Update)
       - DELETE /customers/:id (Delete)
 
   - Sellers
       - GET /sellers (Read)
       - POST /sellers (Create)
-      - PUT /sellers/:id (Update)
+      - PATCH /sellers/:id (Update)
       - DELETE /sellers/:id (Delete)
+
+  SEARCH /users (READ - with query parameters)
+  app.get('/users', async (req, res) => {
+    try {
+      const users = await User.find(req.query)
+      res.json({
+        status: 'SUCCESS',
+        data: users
+      })
+    } catch (error) {
+      res.status(500).json({
+        status: 'FAILED',
+        message: 'Something went wrong'
+      })
+    }
+  })
+
 */
